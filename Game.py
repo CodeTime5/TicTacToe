@@ -1,3 +1,6 @@
+class GameError(Exception):
+    pass
+
 class Game:
     EMPTY = " "
     DIM = 3
@@ -18,8 +21,17 @@ class Game:
         return result
 
     def play(self, row, col):
+        if not (0 < row <= Game.DIM):
+            raise GameError(f"Row {row} not in range.")
+        if not (0 < col <= Game.DIM):
+            raise GameError(f"Column {col} not in range.")
+
         row += -1
         col += -1
+
+        if self._board[row][col] != Game.EMPTY:
+            raise GameError(f"Board not empty at {row + 1} {col + 1}")
+
         self._board[row][col] = self._player
         self._player = Game.P2 if self._player is Game.P1 else Game.P1
     
@@ -37,8 +49,11 @@ class Game:
                 return p
             if all(self._board[i][2 - i] is p for i in range(3)):
                 return p
+        ### For a draw
+        if all(all(pos is not Game.EMPTY for pos in row) for row in self._board):
+            return "DRAW"
         
-        ## No winner
+        ## No winner yet
         return None
 
 
