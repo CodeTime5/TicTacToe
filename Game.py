@@ -1,3 +1,5 @@
+from itertools import product
+
 class GameError(Exception):
     pass
 
@@ -19,6 +21,11 @@ class Game:
                 result += "\n  -----"
         result += f"\n\n{self._player} turn to play"
         return result
+    
+    def at(self, row, col):
+        row += -1
+        col += -1
+        return self._board[row][col]
 
     def play(self, row, col):
         if not (0 < row <= Game.DIM):
@@ -50,12 +57,11 @@ class Game:
             if all(self._board[i][2 - i] is p for i in range(3)):
                 return p
         ### For a draw
-        if all(all(pos is not Game.EMPTY for pos in row) for row in self._board):
+        if all(self._board[r][c] is not Game.EMPTY for r,c in product(range(Game.DIM), range(Game.DIM))):
             return "DRAW"
         
         ## No winner yet
         return None
-
 
 if __name__ == "__main__":
     pass
