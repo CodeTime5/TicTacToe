@@ -1,10 +1,12 @@
 from itertools import product
+from enum import auto
 
 class GameError(Exception):
     pass
 
 class Game:
     EMPTY = " "
+    DRAW = auto()
     DIM = 3
     P1 = "o"
     P2 = "x"
@@ -23,11 +25,19 @@ class Game:
         return result
     
     def at(self, row, col):
-        row += -1
-        col += -1
+        row, col = self._validate(row, col)
         return self._board[row][col]
 
     def play(self, row, col):
+        row, col = self._validate(row, col)
+
+        if self._board[row][col] != Game.EMPTY:
+            raise GameError(f"Board not empty at {row + 1} {col + 1}")
+
+        self._board[row][col] = self._player
+        self._player = Game.P2 if self._player is Game.P1 else Game.P1
+    
+    def _validate(self, row, col):
         if not (0 < row <= Game.DIM):
             raise GameError(f"Row {row} not in range.")
         if not (0 < col <= Game.DIM):
@@ -36,11 +46,7 @@ class Game:
         row += -1
         col += -1
 
-        if self._board[row][col] != Game.EMPTY:
-            raise GameError(f"Board not empty at {row + 1} {col + 1}")
-
-        self._board[row][col] = self._player
-        self._player = Game.P2 if self._player is Game.P1 else Game.P1
+        return row, col
     
     @property
     def winner(self):
@@ -58,7 +64,7 @@ class Game:
                 return p
         ### For a draw
         if all(self._board[r][c] is not Game.EMPTY for r,c in product(range(Game.DIM), range(Game.DIM))):
-            return "DRAW"
+            return Game.DRAW
         
         ## No winner yet
         return None
